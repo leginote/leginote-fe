@@ -23,18 +23,4 @@
 			</a></svelte:fragment
 		>
 	</AppBar>
-
-	<!-- <div class="corner" aria-current={$page.url.pathname === '/' ? 'page' : undefined}>
-		<a href="/">
-			<img src={logo} alt="Leginote" />
-		</a>
-	</div>
-
-	<div>
-		<p>LegiNote</p>
-	</div>
-
-	<div class="corner">
-
-	</div> -->
 </header>
