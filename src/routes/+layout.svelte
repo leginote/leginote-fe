@@ -1,13 +1,17 @@
 <script>
 	import '../app.css';
-	import Header from './Header.svelte';
+	import Header from '$lib/layout/Header.svelte';
+	import Sidebar from '$lib/layout/Sidebar.svelte';
 </script>
 
 <div class="app">
 	<Header />
-	<main>
-		<slot />
-	</main>
+	<div class="flex">
+		<Sidebar />
+		<main>
+			<slot></slot>
+		</main>
+	</div>
 </div>
 
 <style>
