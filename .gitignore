@@ -20,8 +20,7 @@ Thumbs.db
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
-# yarn
-
+# Yarn
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
