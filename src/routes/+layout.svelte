@@ -1,10 +1,10 @@
 <script>
 	import '../app.css';
-	import Header from '$lib/layout/Header.svelte';
-	import Sidebar from '$lib/layout/Sidebar.svelte';
+	import Header from '$components/layout/Header.svelte';
+	import Sidebar from '$components/layout/Sidebar.svelte';
 </script>
 
-<div class="app">
+<div class="app h-full w-full">
 	<Header />
 	<div class="flex">
 		<Sidebar />

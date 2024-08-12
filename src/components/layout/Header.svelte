@@ -4,9 +4,9 @@
 	import logo from '$lib/images/logo.png';
 </script>
 
-<header class="sticky">
+<header class="sticky top-0 border-b">
 	<AppBar
-		class={'w-full'}
+		class={'w-full !bg-surface-50'}
 		gridColumns="grid-cols-3"
 		slotDefault="place-self-center"
 		slotTrail="place-content-end"
