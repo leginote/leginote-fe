@@ -1,22 +1,19 @@
-import { join } from 'path';
-import type { Config } from 'tailwindcss';
+import type { Config } from "tailwindcss";
 
-import { skeleton } from '@skeletonlabs/tw-plugin';
-
-const config = {
-	darkMode: 'class',
-	content: [
-		'./src/**/*.{html,js,svelte,ts}',
-		join(require.resolve('@skeletonlabs/skeleton'), '../**/*.{html,js,svelte,ts}')
-	],
-	theme: {
-		extend: {}
-	},
-	plugins: [
-		skeleton({
-			themes: { preset: ['gold-nouveau'] }
-		})
-	]
-} satisfies Config;
-
+const config: Config = {
+  content: [
+    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        background: "var(--background)",
+        foreground: "var(--foreground)",
+      },
+    },
+  },
+  plugins: [],
+};
 export default config;
