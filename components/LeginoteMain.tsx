@@ -1,10 +1,13 @@
+"use client";
 import { BookAIcon, BookKey, Search } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
 import { BookText } from "lucide-react";
 import React from "react";
+import { useRouter } from "next/navigation";
 
 export default function LeginoteMain() {
+  const router = useRouter();
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -37,7 +40,12 @@ export default function LeginoteMain() {
               placeholder="키워드를 검색하세요"
               className="w-full px-6 py-3 rounded-full text-black"
             />
-            <Search className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Search
+              className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400"
+              onClick={() => {
+                router.push("/search");
+              }}
+            />
           </div>
         </div>
       </div>
