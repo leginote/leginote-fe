@@ -5,9 +5,54 @@ import Image from "next/image";
 import { BookText } from "lucide-react";
 import React from "react";
 import { useRouter } from "next/navigation";
+import api from "@leginote/bill-search-api";
+import { useEffect, useState } from "react";
 
+interface BillData {
+  createdAt: Date;
+  id: string;
+  summary: string;
+  title: string;
+  updatedAt: Date;
+}
 export default function LeginoteMain() {
   const router = useRouter();
+  const [billData, setBillData] = useState<BillData[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchBillData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const connection = {
+          simulate: true,
+          host: "https://bill-search-api.leginote.com",
+        };
+        const result = await api.functional.bill.index(connection, {});
+        const billsData = result.data.map((bill) => ({
+          createdAt: new Date(bill.createdAt),
+          id: bill.id,
+          summary: bill.summary,
+          title: bill.title,
+          updatedAt: bill.updatedAt,
+        }));
+        setBillData(billsData);
+      } catch (err) {
+        console.error("법안 데이터를 가져오는데 실패했습니다:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchBillData();
+  }, []);
+
+  useEffect(() => {
+    console.log("법안 데이터:", billData);
+  }, [billData]);
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
