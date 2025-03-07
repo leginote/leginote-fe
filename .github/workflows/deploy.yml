@@ -1,0 +1,40 @@
+name: Deploy to Oracle Cloud VM (on Pull Request)
+
+# .github/workflows/deploy.yml
+on:
+  workflow_dispatch: # GitHub Actions 탭에서 수동 실행 가능
+  push:
+    branches:
+      - Statpan/issue6
+
+env:
+  PROJECT_DIR: /home/ubuntu/leginote-fe
+  # NODE_MODULES_CACHE는 더 이상 필요하지 않음
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy to Oracle Cloud VM
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.LEGINOTE1_HOST }}
+          username: ${{ secrets.LEGINOTE1_USER }}
+          key: ${{ secrets.LEGINOTE1_SSH_KEY }}
+          script: |
+            mkdir -p $PROJECT_DIR
+            cd $PROJECT_DIR
+
+            # 최신 코드 가져오기 (rsync, node_modules, .next, public 제외)
+            rsync -avz --delete --exclude 'node_modules' --exclude '.next' --exclude 'public' -e "ssh -p 22" . ${{ secrets.LEGINOTE1_USER }}@${{ secrets.LEGINOTE1_HOST }}:$PROJECT_DIR
+            # 의존성 설치
+            npm ci
+            # Next.js 빌드 (VM에서 실행)
+            npm run build
+
+            # Docker 컨테이너 실행 (이미지 빌드 포함)
+            docker-compose up -d --build
