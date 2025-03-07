@@ -39,4 +39,4 @@ jobs:
             npm run build
 
             # Docker 컨테이너 실행 (이미지 빌드 포함)
-            docker-compose up -d --build
+            docker compose up -d
