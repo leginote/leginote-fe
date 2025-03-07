@@ -1,0 +1,10 @@
+services:
+  leginote-fe:
+    # build: .  # 주석 처리 (GitHub Actions에서 빌드하므로)
+    ports:
+      - "3000:3000"
+    volumes:
+      - /home/ubuntu/leginote-fe:/app  # 호스트와 컨테이너 간 소스 코드 마운트
+    environment:
+      - PORT=3000  # 포트 설정 (Next.js 기본 포트 3000)
+    # command: npm start # 기본 동작하므로 주석처리
