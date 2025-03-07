@@ -5,7 +5,7 @@ on:
   workflow_dispatch: # GitHub Actions 탭에서 수동 실행 가능
   push:
     branches:
-      - issue6
+      - Statpan/issue6
 
 env:
   PROJECT_DIR: /home/ubuntu/leginote-fe
