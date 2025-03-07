@@ -1,9 +1,9 @@
 name: Deploy to Oracle Cloud VM (on Pull Request)
 
 on:
-  pull_request:
-    branches:
-      - main
+  #pull_request:
+  #  branches:
+  #    - main
   workflow_dispatch:  # 수동 실행 이벤트 추가
 
 env:
