@@ -31,7 +31,7 @@ jobs:
             cd $PROJECT_DIR
 
             # 최신 코드 가져오기 (rsync, node_modules, .next, public 제외)
-            rsync -avz --delete --exclude 'node_modules' --exclude '.next' --exclude 'public' -e "ssh -p 22" . ${{ secrets.LEGINOTE1_USER }}@${{ secrets.LEGINOTE1_HOST }}:$PROJECT_DIR
+            rsync -avz --delete --exclude 'node_modules' --exclude '.next' --exclude 'public' -e "ssh -p 22022" . ${{ secrets.LEGINOTE1_USER }}@${{ secrets.LEGINOTE1_HOST }}:$PROJECT_DIR
             # 의존성 설치
             npm ci
             # Next.js 빌드 (VM에서 실행)
