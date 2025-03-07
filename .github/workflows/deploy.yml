@@ -28,7 +28,6 @@ jobs:
           username: ${{ secrets.LEGINOTE1_USER }}
           key: ${{ secrets.LEGINOTE1_SSH_KEY }}
           script: |
-            echo ${{ vars.PROJECT_DIR }}: $${{ vars.PROJECT_DIR }}  # 디버깅 출력 추가
 
             mkdir -p $${{ vars.PROJECT_DIR }}
             cd $${{ vars.PROJECT_DIR }}
