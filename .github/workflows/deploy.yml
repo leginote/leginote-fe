@@ -14,6 +14,7 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: leginote1  # 'leginote1' 환경을 사용
 
     steps:
       - name: Checkout code
