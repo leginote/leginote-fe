@@ -1,41 +1,32 @@
 name: Deploy to Oracle Cloud VM (on Pull Request)
 
-# .github/workflows/deploy.yml
 on:
-  workflow_dispatch: # GitHub Actions 탭에서 수동 실행 가능
+  workflow_dispatch:
   push:
     branches:
       - Statpan/issue6
 
-env:
-  PROJECT_DIR: /home/ubuntu/leginote-fe
-  # NODE_MODULES_CACHE는 더 이상 필요하지 않음
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: leginote1  # 'leginote1' 환경을 사용
+    environment: leginote1
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Create SSH Key File
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.LEGINOTE1_SSH_KEY }}" > ~/.ssh/leginote1_ssh_key
-          chmod 600 ~/.ssh/leginote1_ssh_key
-
-      - name: Deploy to Oracle Cloud VM (using ssh command)
-        run: |
-          ssh -i ~/.ssh/leginote1_ssh_key -p ${{ secrets.LEGINOTE1_PORT }} ${{ secrets.LEGINOTE1_USER }}@${{ secrets.LEGINOTE1_HOST }} \
-          "mkdir -p ${{ vars.PROJECT_DIR }} && \
-           cd ${{ vars.PROJECT_DIR }} && \
-           rsync -avz --delete --exclude 'node_modules' --exclude '.next' --exclude 'public' -e 'ssh -p ${{ secrets.LEGINOTE1_PORT }}' . ${{ secrets.LEGINOTE1_USER }}@${{ secrets.LEGINOTE1_HOST }}:${{ vars.PROJECT_DIR }} && \
-           npm ci && \
-           npm run build && \
-           docker compose up -d --build"
-
-      - name: Clean up SSH key
-        if: always()  # 항상 실행 (성공, 실패 여부와 관계없이)
-        run: rm -f ~/.ssh/leginote1_ssh_key
+      - name: Deploy to Oracle Cloud VM
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.LEGINOTE1_HOST }}
+          port: ${{ secrets.LEGINOTE1_PORT }}
+          username: ${{ secrets.LEGINOTE1_USER }}
+          key: ${{ secrets.LEGINOTE1_SSH_KEY }}
+          known_hosts: ${{ secrets.KNOWN_HOST }} # 올바른 known_hosts 설정
+          script: |
+            mkdir -p ${{ vars.PROJECT_DIR }}  # vars 컨텍스트 사용
+            cd ${{ vars.PROJECT_DIR }}
+            rsync -avz --delete --exclude 'node_modules' --exclude '.next' --exclude 'public' -e "ssh -p ${{ secrets.LEGINOTE1_PORT }}" . ${{ secrets.LEGINOTE1_USER }}@${{ secrets.LEGINOTE1_HOST }}:${{ vars.PROJECT_DIR }}
+            npm ci
+            npm run build
+            docker compose up -d --build
