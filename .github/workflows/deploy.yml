@@ -24,6 +24,7 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.LEGINOTE1_HOST }}
+          port: ${{ secrets.LEGINOTE1_PORT }}
           username: ${{ secrets.LEGINOTE1_USER }}
           key: ${{ secrets.LEGINOTE1_SSH_KEY }}
           script: |
