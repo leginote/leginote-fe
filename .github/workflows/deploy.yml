@@ -28,8 +28,10 @@ jobs:
           username: ${{ secrets.LEGINOTE1_USER }}
           key: ${{ secrets.LEGINOTE1_SSH_KEY }}
           script: |
-            mkdir -p $PROJECT_DIR
-            cd $PROJECT_DIR
+            echo ${{ vars.PROJECT_DIR }}: $${{ vars.PROJECT_DIR }}  # 디버깅 출력 추가
+
+            mkdir -p $${{ vars.PROJECT_DIR }}
+            cd $${{ vars.PROJECT_DIR }}
 
             # 최신 코드 가져오기 (rsync, node_modules, .next, public 제외)
             rsync -avz --delete --exclude 'node_modules' --exclude '.next' --exclude 'public' -e "ssh -p 22022" . ${{ secrets.LEGINOTE1_USER }}@${{ secrets.LEGINOTE1_HOST }}:$PROJECT_DIR
