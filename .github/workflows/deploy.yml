@@ -15,18 +15,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Deploy to Oracle Cloud VM
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.LEGINOTE1_HOST }}
-          port: ${{ secrets.LEGINOTE1_PORT }}
-          username: ${{ secrets.LEGINOTE1_USER }}
-          key: ${{ secrets.LEGINOTE1_SSH_KEY }}
-          known_hosts: ${{ secrets.KNOWN_HOST }} # 올바른 known_hosts 설정
-          script: |
-            mkdir -p ${{ vars.PROJECT_DIR }}  # vars 컨텍스트 사용
-            cd ${{ vars.PROJECT_DIR }}
-            rsync -avz --delete --exclude 'node_modules' --exclude '.next' --exclude 'public' -e "ssh -p ${{ secrets.LEGINOTE1_PORT }}" . ${{ secrets.LEGINOTE1_USER }}@${{ secrets.LEGINOTE1_HOST }}:${{ vars.PROJECT_DIR }}
-            npm ci
-            npm run build
-            docker compose up -d --build
+      - name: Create SSH Key and known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.LEGINOTE1_SSH_KEY }}" > ~/.ssh/leginote1_ssh_key
+          chmod 600 ~/.ssh/leginote1_ssh_key
+          echo "${{ secrets.KNOWN_HOST }}" > ~/.ssh/known_hosts  # KNOWN_HOSTS Secrets 사용
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Deploy to Oracle Cloud VM (using ssh command)
+        run: |
+          ssh -i ~/.ssh/leginote1_ssh_key -o UserKnownHostsFile=~/.ssh/known_hosts -p ${{ secrets.LEGINOTE1_PORT }} ${{ secrets.LEGINOTE1_USER }}@${{ secrets.LEGINOTE1_HOST }} \
+            "mkdir -p ${{ vars.PROJECT_DIR }} && \
+             cd ${{ vars.PROJECT_DIR }} && \
+             rsync -avz --delete --exclude 'node_modules' --exclude '.next' --exclude 'public' -e 'ssh -p ${{ secrets.LEGINOTE1_PORT }}' . ${{ secrets.LEGINOTE1_USER }}@${{ secrets.LEGINOTE1_HOST }}:${{ vars.PROJECT_DIR }} && \
+             npm ci && \
+             npm run build && \
+             docker compose up -d --build"
+
+      - name: Clean up SSH key
+        if: always()
+        run: rm -f ~/.ssh/leginote1_ssh_key ~/.ssh/known_hosts
