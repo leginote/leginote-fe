@@ -29,13 +29,47 @@ jobs:
           ssh-keyscan -H -p ${{ secrets.LEGINOTE1_PORT }} ${{ secrets.LEGINOTE1_HOST }} >> ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
 
-      - name: Deploy to Oracle Cloud VM
+      - name: Deploy to Oracle Cloud VM (Final Version)
         run: |
-          ssh -i ~/.ssh/leginote1_ssh_key -o UserKnownHostsFile=~/.ssh/known_hosts -p ${{ secrets.LEGINOTE1_PORT }} ${{ secrets.LEGINOTE1_USER }}@${{ secrets.LEGINOTE1_HOST }} \
-            "bash -s" << EOF
-              cd ${{ env.PROJECT_DIR }} || mkdir -p ${{ env.PROJECT_DIR }} && cd ${{ env.PROJECT_DIR }}
-              rsync -avz --delete --exclude='node_modules' --exclude='.next' --exclude='public' . ${{ secrets.LEGINOTE1_USER }}@${{ secrets.LEGINOTE1_HOST }}:${{ env.PROJECT_DIR }}
-              npm ci --legacy-peer-deps
-              npm run build
+          # SSH 연결 및 명령어 실행 (개선 및 디버깅)
+          ssh -i ~/.ssh/leginote1_ssh_key \
+              -o UserKnownHostsFile=~/.ssh/known_hosts \
+              -o StrictHostKeyChecking=no \
+              -p ${{ secrets.LEGINOTE1_PORT }} \
+              ${{ secrets.LEGINOTE1_USER }}@${{ secrets.LEGINOTE1_HOST }} \
+              "bash -s" << 'EOF'  # 작은따옴표 사용
+
+              set -e  # 오류 발생 시 즉시 중단
+              set -x  # 실행되는 명령어 출력 (디버깅)
+
+              # 작업 디렉토리 확인 및 생성
+              cd "${PROJECT_DIR}" || { mkdir -p "${PROJECT_DIR}" && cd "${PROJECT_DIR}"; }
+              pwd
+
+              # rsync (개선)
+              rsync -avz --delete \
+                --exclude='node_modules' \
+                --exclude='.next' \
+                --exclude='public' \
+                --progress \
+                . ${{ secrets.LEGINOTE1_USER }}@${{ secrets.LEGINOTE1_HOST }}:"${PROJECT_DIR}"
+
+              # npm 및 Docker Compose (오류 처리 개선)
+              if ! npm ci --legacy-peer-deps; then
+                echo "npm ci failed"
+                exit 1
+              fi
+
+              if ! npm run build; then
+                echo "npm run build failed"
+                exit 1
+              fi
+              
+              if [ ! -f docker-compose.yml ]; then
+                echo "docker-compose.yml not found!"
+                ls -la
+                exit 1
+              fi
+
               docker compose up -d --build
           EOF
