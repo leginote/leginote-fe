@@ -21,7 +21,9 @@ jobs:
       - name: Setup Node.js 20
         uses: actions/setup-node@v3
         with:
-          node-version: '20'  # Node.js 20 버전 명시
+          node-version: '20'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@SungDongHa'  # GitHub 사용자 이름 또는 조직 이름 (정확하게)
 
       - name: Setup SSH Key
         run: |
@@ -33,24 +35,23 @@ jobs:
         run: |
           ssh-keyscan -H -p ${{ secrets.LEGINOTE1_PORT }} ${{ secrets.LEGINOTE1_HOST }} >> ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
-      - name:  GitHub Package Registry 인증
-        run: |
 
-          # GitHub Package Registry 인증 설정
-          echo "//npm.pkg.github.com/:_authToken=${GIT_AUTH_TOKEN}" > .npmrc
-          chmod 600 .npmrc
-      - name: Deploy to Oracle Cloud VM (Final Version)
+      - name: Install and Build
         env:
-          GIT_AUTH_TOKEN: ${{ secrets.LEGINOTE1_GIT_AUTH }}
-          PROJECT_DIR: /home/ubuntu/leginote-fe
-
+          NODE_AUTH_TOKEN: ${{ secrets.LEGINOTE1_GIT_AUTH }}  # GitHub PAT 사용
         run: |
           set -e
           set -x
 
-        
           npm ci
           npm run build
+
+      - name: Deploy to Oracle Cloud VM (Final Version)
+        env:
+          PROJECT_DIR: /home/ubuntu/leginote-fe
+        run: |
+          set -e
+          set -x
           # rsync
           rsync -avz -e "ssh -i ~/.ssh/leginote1_ssh_key -p ${{ secrets.LEGINOTE1_PORT }} -o StrictHostKeyChecking=no" \
             --exclude='node_modules' \
@@ -72,5 +73,4 @@ jobs:
             pwd
 
             docker compose up -d --build
-
           EOF
