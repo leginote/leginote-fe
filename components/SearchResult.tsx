@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, X } from "lucide-react";
+import { Search, X, ChevronUp, ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +16,17 @@ import PDFViewer from "./pdf-viewer";
 
 export default function SearchResult() {
   const [isPDFOpen, setIsPDFOpen] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState({
+    caseType: true,
+    court: true,
+  });
+
+  const toggleFilter = (filter) => {
+    setFiltersOpen((prev) => ({
+      ...prev,
+      [filter]: !prev[filter],
+    }));
+  };
 
   return (
     <div className="h-screen flex">
@@ -109,7 +120,8 @@ export default function SearchResult() {
 
               {/* Result Items */}
               <div className="space-y-6">
-                <button
+                <div
+                  role="button"
                   onClick={() => setIsPDFOpen(true)}
                   className="block w-full text-left border rounded-lg p-4 hover:border-gray-400 transition-colors"
                 >
@@ -126,9 +138,10 @@ export default function SearchResult() {
                   <Badge variant="outline" className="text-xs">
                     피기(자법), 전적 10년
                   </Badge>
-                </button>
+                </div>
 
-                <button
+                <div
+                  role="button"
                   onClick={() => setIsPDFOpen(true)}
                   className="block w-full text-left border rounded-lg p-4 hover:border-gray-400 transition-colors"
                 >
@@ -146,77 +159,95 @@ export default function SearchResult() {
                   <Badge variant="outline" className="text-xs">
                     피기(자법), 전적 7년
                   </Badge>
-                </button>
+                </div>
               </div>
             </div>
 
             {/* Filters */}
             <div className="w-64 flex-shrink-0">
-              {/* Case Type Filter */}
-              <Collapsible defaultOpen>
-                <CollapsibleTrigger className="flex items-center justify-between w-full py-2">
+              {/* Case Type Filter - 버튼 중첩 문제 해결 */}
+              <div className="mb-4">
+                <div
+                  className="flex items-center justify-between w-full py-2 cursor-pointer"
+                  onClick={() => toggleFilter("caseType")}
+                >
                   <span className="font-medium">사건 종류</span>
-                  <Button variant="ghost" size="sm">
-                    -
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="a" />
-                    <label htmlFor="형사" className="text-sm">
-                      형사
-                    </label>
+                  <span className="text-gray-500">
+                    {filtersOpen.caseType ? (
+                      <ChevronUp size={16} />
+                    ) : (
+                      <ChevronDown size={16} />
+                    )}
+                  </span>
+                </div>
+                {filtersOpen.caseType && (
+                  <div className="space-y-2 mt-2">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="형사" />
+                      <label htmlFor="형사" className="text-sm">
+                        형사
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="민사" />
+                      <label htmlFor="민사" className="text-sm">
+                        민사
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="행정" />
+                      <label htmlFor="행정" className="text-sm">
+                        행정
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="헌법" />
+                      <label htmlFor="헌법" className="text-sm">
+                        헌법
+                      </label>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="b" />
-                    <label htmlFor="민사" className="text-sm">
-                      민사
-                    </label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="c" />
-                    <label htmlFor="행정" className="text-sm">
-                      행정
-                    </label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="d" />
-                    <label htmlFor="헌법" className="text-sm">
-                      헌법
-                    </label>
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
+                )}
+              </div>
 
-              {/* Court Filter */}
-              <Collapsible defaultOpen className="mt-4">
-                <CollapsibleTrigger className="flex items-center justify-between w-full py-2">
+              {/* Court Filter - 버튼 중첩 문제 해결 */}
+              <div className="mb-4">
+                <div
+                  className="flex items-center justify-between w-full py-2 cursor-pointer"
+                  onClick={() => toggleFilter("court")}
+                >
                   <span className="font-medium">법원</span>
-                  <Button variant="ghost" size="sm">
-                    -
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="대법원" />
-                    <label htmlFor="대법원" className="text-sm">
-                      대법원
-                    </label>
+                  <span className="text-gray-500">
+                    {filtersOpen.court ? (
+                      <ChevronUp size={16} />
+                    ) : (
+                      <ChevronDown size={16} />
+                    )}
+                  </span>
+                </div>
+                {filtersOpen.court && (
+                  <div className="space-y-2 mt-2">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="대법원" />
+                      <label htmlFor="대법원" className="text-sm">
+                        대법원
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="고등법원" />
+                      <label htmlFor="고등법원" className="text-sm">
+                        고등법원/특허법원/고등군사법원
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="지방법원" />
+                      <label htmlFor="지방법원" className="text-sm">
+                        지방법원/행정법원/가정법원/회생법원
+                      </label>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="고등법원" />
-                    <label htmlFor="고등법원" className="text-sm">
-                      고등법원/특허법원/고등군사법원
-                    </label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="지방법원" />
-                    <label htmlFor="지방법원" className="text-sm">
-                      지방법원/행정법원/가정법원/회생법원
-                    </label>
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
+                )}
+              </div>
             </div>
           </div>
         </div>
