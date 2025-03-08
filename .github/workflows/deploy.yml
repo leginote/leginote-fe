@@ -4,31 +4,38 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - Statpan/issue6
+      - Statpan/issue6  # 기존 브랜치
+
+env:
+  PROJECT_DIR: /home/ubuntu/leginote-fe  # 기존 환경 변수 사용
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: leginote1
+    environment: leginote1  # 'leginote1' 환경 사용
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Deploy to Oracle Cloud VM
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.LEGINOTE1_HOST }}
-          port: ${{ secrets.LEGINOTE1_PORT }}
-          username: ${{ secrets.LEGINOTE1_USER }}
-          key: ${{ secrets.LEGINOTE1_SSH_KEY }}
-          known_hosts: ${{ secrets.KNOWN_HOST }} # 올바른 known_hosts 설정
-          strict_host_key_checking: false
+      - name: Create SSH Key and known_hosts  # SSH 키 및 known_hosts 생성
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.LEGINOTE1_SSH_KEY }}" > ~/.ssh/leginote1_ssh_key
+          chmod 600 ~/.ssh/leginote1_ssh_key
+          echo "${{ secrets.KNOWN_HOST }}" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
 
-          script: |
-            mkdir -p ${{ vars.PROJECT_DIR }}  # vars 컨텍스트 사용
-            cd ${{ vars.PROJECT_DIR }}
-            rsync -avz --delete --exclude 'node_modules' --exclude '.next' --exclude 'public' -e "ssh -p ${{ secrets.LEGINOTE1_PORT }}" . ${{ secrets.LEGINOTE1_USER }}@${{ secrets.LEGINOTE1_HOST }}:${{ vars.PROJECT_DIR }}
-            npm ci
-            npm run build
-            docker compose up -d --build
+      - name: Deploy to Oracle Cloud VM (using ssh command)
+        run: |
+          ssh -i ~/.ssh/leginote1_ssh_key -o UserKnownHostsFile=~/.ssh/known_hosts -p ${{ secrets.LEGINOTE1_PORT }} ${{ secrets.LEGINOTE1_USER }}@${{ secrets.LEGINOTE1_HOST }} \
+            "mkdir -p $PROJECT_DIR && \
+             cd $PROJECT_DIR && \
+             rsync -avz --delete --exclude 'node_modules' --exclude '.next' --exclude 'public' -e 'ssh -p ${{ secrets.LEGINOTE1_PORT }}' . ${{ secrets.LEGINOTE1_USER }}@${{ secrets.LEGINOTE1_HOST }}:$PROJECT_DIR && \
+             npm ci && \
+             npm run build && \
+             docker compose up -d --build"
+
+      - name: Clean up SSH key  # SSH 키 및 known_hosts 삭제
+        if: always()
+        run: rm -f ~/.ssh/leginote1_ssh_key ~/.ssh/known_hosts
