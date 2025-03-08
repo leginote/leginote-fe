@@ -48,12 +48,17 @@ jobs:
               -o StrictHostKeyChecking=no \
               -p ${{ secrets.LEGINOTE1_PORT }} \
               ${{ secrets.LEGINOTE1_USER }}@${{ secrets.LEGINOTE1_HOST }} \
-              "bash -s" << 'EOF'
+              "bash -s" << EOF  # 작은따옴표 대신 큰따옴표 사용
               set -e  # 오류 발생 시 즉시 중단
               set -x  # 실행되는 명령어 출력 (디버깅)
 
+              # nvm 초기화 (nvm을 사용하는 경우)
+              export NVM_DIR="\$HOME/.nvm"
+              [ -s "\$NVM_DIR/nvm.sh" ] && . "\$NVM_DIR/nvm.sh"
+              nvm use default || echo "nvm not found, assuming global npm"
+
               # 작업 디렉토리로 이동
-              cd "${PROJECT_DIR}"
+              cd "\${PROJECT_DIR}"
               pwd
 
               # GitHub Package Registry 인증 설정
