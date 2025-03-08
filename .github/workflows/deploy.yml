@@ -18,6 +18,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Setup Node.js  # actions/setup-node 사용
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'  # 사용할 Node.js 버전 명시
+
       - name: Setup SSH Key
         run: |
           mkdir -p ~/.ssh
@@ -35,6 +40,9 @@ jobs:
           PROJECT_DIR: /home/ubuntu/leginote-fe
 
         run: |
+          set -e  # 전체 Workflow에 적용
+          set -x  # 전체 Workflow에 적용
+
           # rsync로 로컬에서 원격 서버로 파일 전송
           rsync -avz -e "ssh -i ~/.ssh/leginote1_ssh_key -p ${{ secrets.LEGINOTE1_PORT }} -o StrictHostKeyChecking=no" \
             --exclude='node_modules' \
@@ -50,27 +58,17 @@ jobs:
               -o StrictHostKeyChecking=no \
               -p ${{ secrets.LEGINOTE1_PORT }} \
               ${{ secrets.LEGINOTE1_USER }}@${{ secrets.LEGINOTE1_HOST }} \
-              "bash -s" << EOF  # 작은따옴표 대신 큰따옴표 사용
-              set -e  # 오류 발생 시 즉시 중단
-              set -x  # 실행되는 명령어 출력 (디버깅)
+              "bash -s" << EOF
+              set -e
+              set -x
 
-              # nvm 초기화 (nvm을 사용하는 경우)
-              export NVM_DIR="$HOME/.nvm"
-              [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-
-              # PATH 환경 변수 명시적으로 설정 (nvm이 설치된 경로를 기준으로)
-              export PATH="$NVM_DIR/versions/node/$(nvm current)/bin:$PATH"
-
-              # 작업 디렉토리로 이동
               cd ${PROJECT_DIR}
               pwd
-
               # GitHub Package Registry 인증 설정
               echo "//npm.pkg.github.com/:_authToken=${GIT_AUTH_TOKEN}" > .npmrc
-
-              # npm 및 Docker Compose 실행
+              chmod 600 .npmrc
+              
               npm ci
-
               npm run build
 
               docker compose up -d --build
