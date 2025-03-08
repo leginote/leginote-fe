@@ -30,12 +30,15 @@ jobs:
           chmod 600 ~/.ssh/known_hosts
 
       - name: Deploy to Oracle Cloud VM (Final Version)
+        env:
+          GIT_AUTH_TOKEN: ${{ secrets.LEGINOTE1_GIT_AUTH }}  # Secret에서 토큰 가져오기
         run: |
           # rsync로 로컬에서 원격 서버로 파일 전송
           rsync -avz -e "ssh -i ~/.ssh/leginote1_ssh_key -p ${{ secrets.LEGINOTE1_PORT }} -o StrictHostKeyChecking=no" \
             --exclude='node_modules' \
             --exclude='.next' \
             --exclude='public' \
+            --exclude='.git' \
             --progress \
             . ${{ secrets.LEGINOTE1_USER }}@${{ secrets.LEGINOTE1_HOST }}:"${PROJECT_DIR}"
 
@@ -52,6 +55,9 @@ jobs:
               # 작업 디렉토리로 이동
               cd "${PROJECT_DIR}"
               pwd
+
+              # GitHub Package Registry 인증 설정
+              echo "//npm.pkg.github.com/:_authToken=${GIT_AUTH_TOKEN}" > .npmrc
 
               # npm 및 Docker Compose 실행
               if ! npm ci --legacy-peer-deps; then
