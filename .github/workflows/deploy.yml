@@ -6,6 +6,9 @@ on:
     branches:
       - Statpan/issue6
 
+env:
+  PROJECT_DIR: /home/ubuntu/leginote-fe
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -15,20 +18,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Deploy to Oracle Cloud VM
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.LEGINOTE1_HOST }}
-          port: ${{ secrets.LEGINOTE1_PORT }}
-          username: ${{ secrets.LEGINOTE1_USER }}
-          key: ${{ secrets.LEGINOTE1_SSH_KEY }}
-          #known_hosts: ${{ secrets.KNOWN_HOST }} # 올바른 known_hosts 설정
-          strict_host_key_checking: false
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.LEGINOTE1_SSH_KEY }}" > ~/.ssh/leginote1_ssh_key
+          chmod 600 ~/.ssh/leginote1_ssh_key
 
-          script: |
-            mkdir -p ${{ vars.PROJECT_DIR }}  # vars 컨텍스트 사용
-            cd ${{ vars.PROJECT_DIR }}
-            rsync -avz --delete --exclude 'node_modules' --exclude '.next' --exclude 'public' -e "ssh -p ${{ secrets.LEGINOTE1_PORT }}" . ${{ secrets.LEGINOTE1_USER }}@${{ secrets.LEGINOTE1_HOST }}:${{ vars.PROJECT_DIR }}
-            npm ci
-            npm run build
-            docker compose up -d --build
+      - name: Get Host Key and Add to known_hosts
+        run: |
+          ssh-keyscan -H ${{ secrets.LEGINOTE1_HOST }} >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Deploy to Oracle Cloud VM
+        run: |
+          ssh -i ~/.ssh/leginote1_ssh_key -o UserKnownHostsFile=~/.ssh/known_hosts -p ${{ secrets.LEGINOTE1_PORT }} ${{ secrets.LEGINOTE1_USER }}@${{ secrets.LEGINOTE1_HOST }} \
+            "bash -s" << EOF
+              cd ${{ env.PROJECT_DIR }} || mkdir -p ${{ env.PROJECT_DIR }} && cd ${{ env.PROJECT_DIR }}  # 디렉토리가 없으면 생성 후 이동
+              rsync -avz --delete --exclude='node_modules' --exclude='.next' --exclude='public' . ${{ secrets.LEGINOTE1_USER }}@${{ secrets.LEGINOTE1_HOST }}:${{ env.PROJECT_DIR }}
+              npm ci --legacy-peer-deps  # --legacy-peer-deps 추가 (필요한 경우)
+              npm run build
+              docker compose up -d --build
+            EOF
