@@ -16,7 +16,7 @@ export default function SearchResult() {
     court: true,
   });
 
-  const toggleFilter = (filter) => {
+  const toggleFilter = (filter: "caseType" | "court") => {
     setFiltersOpen((prev) => ({
       ...prev,
       [filter]: !prev[filter],
