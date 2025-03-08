@@ -33,9 +33,9 @@ jobs:
         run: |
           ssh -i ~/.ssh/leginote1_ssh_key -o UserKnownHostsFile=~/.ssh/known_hosts -p ${{ secrets.LEGINOTE1_PORT }} ${{ secrets.LEGINOTE1_USER }}@${{ secrets.LEGINOTE1_HOST }} \
             "bash -s" << EOF
-              cd ${{ env.PROJECT_DIR }} || mkdir -p ${{ env.PROJECT_DIR }} && cd ${{ env.PROJECT_DIR }}  # 디렉토리가 없으면 생성 후 이동
+              cd ${{ env.PROJECT_DIR }} || mkdir -p ${{ env.PROJECT_DIR }} && cd ${{ env.PROJECT_DIR }}
               rsync -avz --delete --exclude='node_modules' --exclude='.next' --exclude='public' . ${{ secrets.LEGINOTE1_USER }}@${{ secrets.LEGINOTE1_HOST }}:${{ env.PROJECT_DIR }}
-              npm ci --legacy-peer-deps  # --legacy-peer-deps 추가 (필요한 경우)
+              npm ci --legacy-peer-deps
               npm run build
               docker compose up -d --build
-            EOF
+          EOF
