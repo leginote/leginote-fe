@@ -32,6 +32,8 @@ jobs:
       - name: Deploy to Oracle Cloud VM (Final Version)
         env:
           GIT_AUTH_TOKEN: ${{ secrets.LEGINOTE1_GIT_AUTH }}  # Secret에서 토큰 가져오기
+          PROJECT_DIR: /home/ubuntu/leginote-fe
+
         run: |
           # rsync로 로컬에서 원격 서버로 파일 전송
           rsync -avz -e "ssh -i ~/.ssh/leginote1_ssh_key -p ${{ secrets.LEGINOTE1_PORT }} -o StrictHostKeyChecking=no" \
@@ -53,10 +55,14 @@ jobs:
               set -x  # 실행되는 명령어 출력 (디버깅)
 
               # nvm 초기화 (nvm을 사용하는 경우)
-              source ~/.bashrc
+              export NVM_DIR="$HOME/.nvm"
+              [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+
+              # PATH 환경 변수 명시적으로 설정 (nvm이 설치된 경로를 기준으로)
+              export PATH="$NVM_DIR/versions/node/$(nvm current)/bin:$PATH"
 
               # 작업 디렉토리로 이동
-              cd "\${PROJECT_DIR}"
+              cd ${PROJECT_DIR}
               pwd
 
               # GitHub Package Registry 인증 설정
