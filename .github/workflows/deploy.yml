@@ -69,21 +69,9 @@ jobs:
               echo "//npm.pkg.github.com/:_authToken=${GIT_AUTH_TOKEN}" > .npmrc
 
               # npm 및 Docker Compose 실행
-              if ! npm ci --legacy-peer-deps; then
-                echo "npm ci failed"
-                exit 1
-              fi
+              npm ci
 
-              if ! npm run build; then
-                echo "npm run build failed"
-                exit 1
-              fi
-
-              if [ ! -f docker-compose.yml ]; then
-                echo "docker-compose.yml not found!"
-                ls -la
-                exit 1
-              fi
+              npm run build
 
               docker compose up -d --build
           EOF
