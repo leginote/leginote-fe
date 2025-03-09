@@ -1,12 +1,24 @@
+version: "3.8"
 services:
   leginote-fe:
-    image: node:20-alpine # 베이스 이미지
-    # build: .  # 주석 처리 (GitHub Actions에서 빌드하므로)
+    image: node:20-alpine
     working_dir: /leginote-fe
     ports:
       - "3000:3000"
     volumes:
-      - /home/ubuntu/leginote-fe:/leginote-fe  # 호스트와 컨테이너 간 소스 코드 마운트
+      - /home/ubuntu/leginote-fe:/leginote-fe
     environment:
-      - PORT=3000  # 포트 설정 (Next.js 기본 포트 3000)
-    command: npm start # 기본 동작하므로 주석처리
+      - PORT=3000
+    command: npm run start
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - /etc/letsencrypt:/etc/letsencrypt
+      - /home/ubuntu/leginote-fe/.next:/leginote-fe/.next
+    depends_on:
+      - leginote-fe
