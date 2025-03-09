@@ -1,7 +1,6 @@
 "use client";
-import { BookAIcon, BookKey, Search } from "lucide-react";
+import { BookAIcon, Search } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import Image from "next/image";
 import { BookText } from "lucide-react";
 import React from "react";
 import { useRouter } from "next/navigation";
@@ -18,14 +17,10 @@ interface BillData {
 export default function LeginoteMain() {
   const router = useRouter();
   const [billData, setBillData] = useState<BillData[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchBillData = async () => {
       try {
-        setIsLoading(true);
-        setError(null);
         const connection = {
           simulate: true,
           host: "https://bill-search-api.leginote.com",
@@ -42,7 +37,6 @@ export default function LeginoteMain() {
       } catch (err) {
         console.error("법안 데이터를 가져오는데 실패했습니다:", err);
       } finally {
-        setIsLoading(false);
       }
     };
 
@@ -59,13 +53,21 @@ export default function LeginoteMain() {
       <header className="flex items-center justify-between px-6 py-4 border-b">
         <div className="text-xl font-bold">LegiNote.</div>
         <div className="flex items-center gap-4">
-          <button className="text-orange-500 border border-orange-500 rounded-full px-4 py-1">
+          <div
+            role="button"
+            className="text-orange-500 border border-orange-500 rounded-full px-4 py-1"
+          >
             LegiNote Plus
-          </button>
-          <button className="text-gray-600">로그인</button>
-          <button className="bg-gray-900 text-white px-4 py-1 rounded">
+          </div>
+          <div role="button" className="text-gray-600">
+            로그인
+          </div>
+          <div
+            role="button"
+            className="bg-gray-900 text-white px-4 py-1 rounded"
+          >
             회원가입
-          </button>
+          </div>
         </div>
       </header>
 
